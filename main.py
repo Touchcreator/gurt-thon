@@ -84,7 +84,7 @@ def make_gurt_style(gurt_code): # YO_GURT
             
             if gurt_code[i:i+len(spaced_condition)] == spaced_condition and is_actual_code():
                 final_code+=conditions[condition]
-                i+=len(spaced_condition)
+                i+=len(spaced_condition)-1
 
         for replacement in replacements:
             if gurt_code[i:i+len(replacement)] == replacement and double_quote_count == 0:
