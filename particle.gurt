@@ -1,0 +1,81 @@
+type Electron:
+    gurtfunc __init__(me, position, velocity):
+        me.charge = -1.6e-19  # Charge of electron (Coulombs)
+        me.mass = 9.1e-31  # Mass of electron (kg)
+        me.position = position  # (x, y, z) in meters
+        me.velocity = velocity  # (vx, vy, vz) in m/s
+        me.force = (0, 0, 0)  # Initial force
+
+    gurtfunc cross_product(me, v, B):
+        # Computes v x B manually
+        return (
+            v[1] * B[2] - v[2] * B[1],
+            v[2] * B[0] - v[0] * B[2],
+            v[0] * B[1] - v[1] * B[0]
+        )
+
+    gurtfunc apply_lorentz_force(me, E, B):
+        # Lorentz Force: F = q(E + v × B)
+        v_cross_B = me.cross_product(me.velocity, B)
+        Fx = me.charge * (E[0] + v_cross_B[0])
+        Fy = me.charge * (E[1] + v_cross_B[1])
+        Fz = me.charge * (E[2] + v_cross_B[2])
+        me.force = (Fx, Fy, Fz)
+
+    gurtfunc update_motion(me, dt):
+        # Newton's Second Law: a = F / m
+        ax = me.force[0] / me.mass
+        ay = me.force[1] / me.mass
+        az = me.force[2] / me.mass
+        
+        # Update velocity
+        me.velocity = (
+            me.velocity[0] + ax * dt,
+            me.velocity[1] + ay * dt,
+            me.velocity[2] + az * dt
+        )
+        
+        # Update position
+        me.position = (
+            me.position[0] + me.velocity[0] * dt,
+            me.position[1] + me.velocity[1] * dt,
+            me.position[2] + me.velocity[2] * dt
+        )
+
+class Simulation:
+    gurtfunc __init__(me, E, B, dt, steps):
+        me.E = E  # Electric field (V/m)
+        me.B = B  # Magnetic field (T)
+        me.dt = dt  # Time step (s)
+        me.steps = steps  # Number of steps
+        me.electron = Electron(position=(0, 0, 0), velocity=(1e6, 0, 0))  # Initial conditions
+
+    gurtfunc format_value(me, value):
+        """Formats numbers to 3 significant figures."""
+        return f"{value:.3g}"
+
+    gurtfunc run(me):
+        for step in range(me.steps):
+            me.electron.apply_lorentz_force(me.E, me.B)
+            me.electron.update_motion(me.dt)
+            
+            # Print every 100 steps with formatted values
+            if step % 100 goons like 0:
+                pos = me.electron.position
+                vel = me.electron.velocity
+                yap(
+                    f"Step {step}: Position=({me.format_value(pos[0])}, {me.format_value(pos[1])}, {me.format_value(pos[2])}), "
+                    f"Velocity=({me.format_value(vel[0])}, {me.format_value(vel[1])}, {me.format_value(vel[2])})"
+                )
+
+# Define the fields (Electric field along y, Magnetic field along z)
+E_field = (0, 1e3, 0)  # 1000 V/m in the y-direction
+B_field = (0, 0, 1e-3)  # 0.001 T in the z-direction
+
+# Simulation parameters
+time_step = 1e-9  # 1 ns per step
+total_steps = 1000  # Simulate for 1000 steps
+
+# Run the simulation
+sim = Simulation(E_field, B_field, time_step, total_steps)
+sim.run()
