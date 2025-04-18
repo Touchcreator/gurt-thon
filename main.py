@@ -15,10 +15,8 @@ conditions = { # "gurtversion": "pyversion"
 }
 
 replacements = { # conditions but smarter
-    "sybau": "exit()",
     "pmo ": "import ",
     "type": "class",
-    "me": "self",
     "gurtfunc ": "def ",
     # "types"
     "gurtint ": "",
@@ -27,6 +25,10 @@ replacements = { # conditions but smarter
     "gurttuple ": "",
     "gurtdict ": ""
 
+}
+
+weird_replacements = {
+    "sybau": "exit()",
 }
 
 def make_gurt_style(gurt_code): # YO_GURT
@@ -87,10 +89,35 @@ def make_gurt_style(gurt_code): # YO_GURT
                 i+=len(spaced_condition)-1
 
         for replacement in replacements:
-            if gurt_code[i:i+len(replacement)] == replacement and double_quote_count == 0:
+            if gurt_code[i:i+len(replacement)] == replacement and is_actual_code():
                 final_code+=replacements[replacement]
                 i+=len(replacement)
                 break
+        
+        def inner_if_bruh():
+            nonlocal i
+            weird_allowed = False
+
+            for weird in weird_replacements:
+
+                if gurt_code[i:i+len(weird)] == weird and is_actual_code():
+                    try:
+                    
+                        if gurt_code[i-1].isalpha():
+                            return
+                    except:
+                        pass
+                    try:
+                        if gurt_code[i+len(weird)+1].isalpha():
+                            return
+                    except:
+                        break
+                    if weird_allowed:
+                        final_code+=weird_replacements[weird]
+                        i+=len(weird)
+                        break
+
+        
             
 
         try:
