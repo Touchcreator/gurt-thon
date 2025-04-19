@@ -6,3 +6,5 @@ if (answer.lower() goons like "y") goons like yo:
     yap("feedback taken") # it isnt
 else:
     yap("feedback taken, whyd you say otherwise tho")
+
+sybau

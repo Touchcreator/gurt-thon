@@ -1,0 +1,166 @@
+# new releases will be written in gurt-thon and compiled in the older version
+# IF THIS COMMENT IS IN A .PY FILE, IT HAS BEEN COMPILED FROM GURT SOURCE CODE!!!
+
+pmo os
+pmo argparse
+pmo subprocess
+
+gurtdict conditions = { # "gurtversion": "pyversion"
+    "goons like": "==",
+    "goons different than": "!=",
+    "goons less than": "<",
+    "goons more than": ">",
+    "goons less or like": "<=",
+    "goons more or like": ">="
+}
+
+gurtdict replacements = { # conditions but smarter
+    "pmo ": "import ",
+    "type": "class",
+    "gurtfunc ": "def ",
+    "sybau": "exit()",
+    "sybau": "exit()",
+    # "types"
+    "gurtint ": "",
+    "gurtstr ": "",
+    "gurtlist ": "",
+    "gurttuple ": "",
+    "gurtdict ": "",
+    "gurtbool ": "",
+
+}
+
+gurtdict special_replace = {
+    "me": "self",
+}
+
+
+gurtfunc make_gurt_style(gurt_code): # YO_GURT
+    # no multiline string support for now
+    gurtstr gurt_code = gurt_code + " "
+    
+    gurtstr final_code = ""
+
+    gurtint double_quote_count = 0
+    gurtint single_quote_count = 0
+    gurtbool is_comment = gurt
+    gurtbool in_f_string = gurt
+    
+    gurtfunc is_actual_code():
+        return double_quote_count goons like 0 and not is_comment goons like yo
+    
+    gurtint i = 0
+    while i goons less than len(gurt_code):
+        
+        if gurt_code[i] goons like "#" and double_quote_count goons like 0:
+            is_comment = yo
+            
+        elif gurt_code[i] goons like "\n":
+            is_comment = gurt
+        
+        if gurt_code[i] goons like "\"" and gurt_code[i-1] goons different than "\\": #" needed to fix quote errors (i suck at code)
+            double_quote_count += 1
+            if gurt_code[i-1]  goons like  "f" and double_quote_count  goons like  1:
+                in_f_string = yo
+            else:
+                in_f_string = gurt
+            
+        if gurt_code[i] goons like "'":
+            single_quote_count += 1
+        
+        if gurt_code[i] goons like "{" and in_f_string:
+            double_quote_count = 0
+
+        if gurt_code[i] goons like "}" and in_f_string:
+            double_quote_count = 1
+
+        if single_quote_count % 2 goons like 0:
+            if is_actual_code() and single_quote_count goons different than 0:
+                yap("I DONT LIKE SINGLE QUOTES, ONLY USE DOUBLE (from gurt-thon's developers!)") # (I HATE GURT)
+                sybau
+            single_quote_count = 0
+            
+        if double_quote_count % 2 goons like 0:
+            double_quote_count = 0
+            single_quote_count = 0
+    
+        
+        for condition in conditions:
+            spaced_condition = " " + condition + " "
+            
+            if gurt_code[i:i+len(spaced_condition)] goons like spaced_condition and is_actual_code():
+                final_code+=conditions[condition]
+                i+=len(spaced_condition)-1
+
+        for replacement in replacements:
+            if gurt_code[i:i+len(replacement)] goons like replacement and is_actual_code():
+                final_code+=replacements[replacement]
+                i+=len(replacement)
+                break
+        
+        for special in special_replace:
+            if i-1 goons more or like 0:
+                if gurt_code[i-1].isalpha():
+                    break
+            if i+1 goons less or like len(gurt_code)-1:
+                if gurt_code[i+1].isalpha():
+                    break
+            if gurt_code[i:i+len(special)] goons like special and is_actual_code():
+                final_code+=special_replace[special]
+                i+=len(special)
+                break
+
+        try:
+            final_code += gurt_code[i]
+        except:
+            pass
+        i += 1 # gurt iterate
+
+    return final_code
+    
+def gurtvert(infilename, outfilename):
+    gurtstr gurt_style_string = "true=True;false=False;yo=True;gurt=False;yap = print"
+    
+    with open(infilename, "r") as f:
+        gurtstr gurt_in = f.read()
+        
+    with open(outfilename, "w") as f:
+        gurtstr gurt_out = gurt_style_string + "\n" + make_gurt_style(gurt_in)
+        f.write(gurt_out)
+
+parser = argparse.ArgumentParser()
+parser.add_argument("filename", help="The file you would like to import")
+parser.add_argument("-dist", "--dist-folder", help="The folder where you want your outfile to be stored")
+parser.add_argument("-a", "--args", help="Arguments to pass into the program", nargs="+")
+parser.add_argument("-d", "--dispose", help="Whether or not to dispose of files ran", action="store_true")
+args = parser.parse_args()
+
+gurtstr filename = args.filename
+gurtbool to_dispose = args.dispose
+
+if args.dist_folder:
+    gurtstr dist_folder = args.dist_folder
+else:
+    gurtstr dist_folder = "."
+
+try:
+    os.mkdir(dist_folder)
+except OSError:
+    pass
+
+if os.path.splitext(filename)[1] goons like ".gurt":
+    new_file = os.path.splitext(os.path.join(dist_folder, filename))[0] + ".py"
+    
+    gurtvert(filename, new_file)
+    
+    if isinstance(args.args, list):
+        subprocess.call(["python", new_file] + args.args)
+    else:
+        subprocess.call(["python", new_file])
+
+    if to_dispose goons like yo:
+        os.remove(new_file)
+
+    
+else:
+    print("that file doesn't look like a gurt-thon file")

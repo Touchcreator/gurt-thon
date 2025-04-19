@@ -3,33 +3,36 @@
 
 import os
 import argparse
-import sys
+import subprocess
 
 conditions = { # "gurtversion": "pyversion"
     "goons like": "==",
     "goons different than": "!=",
     "goons less than": "<",
     "goons more than": ">",
-    "goons less than or like": "<=",
-    "goons more than or like": ">="
+    "goons less or like": "<=",
+    "goons more or like": ">="
 }
 
 replacements = { # conditions but smarter
     "pmo ": "import ",
     "type": "class",
     "gurtfunc ": "def ",
+    "sybau": "exit()",
     # "types"
     "gurtint ": "",
     "gurtstr ": "",
     "gurtlist ": "",
     "gurttuple ": "",
-    "gurtdict ": ""
+    "gurtdict ": "",
+    "gurtbool ": "",
 
 }
 
-weird_replacements = {
-    "sybau": "exit()",
+special_replace = {
+    "me": "self",
 }
+
 
 def make_gurt_style(gurt_code): # YO_GURT
     # no multiline string support for now
@@ -54,7 +57,7 @@ def make_gurt_style(gurt_code): # YO_GURT
         elif gurt_code[i] == "\n":
             is_comment = False
         
-        if gurt_code[i] == "\"":
+        if gurt_code[i] == "\"" and gurt_code[i-1] != "\\":
             double_quote_count += 1
             if gurt_code[i-1] == "f" and double_quote_count == 1:
                 in_f_string = True
@@ -94,31 +97,17 @@ def make_gurt_style(gurt_code): # YO_GURT
                 i+=len(replacement)
                 break
         
-        def inner_if_bruh():
-            nonlocal i
-            weird_allowed = False
-
-            for weird in weird_replacements:
-
-                if gurt_code[i:i+len(weird)] == weird and is_actual_code():
-                    try:
-                    
-                        if gurt_code[i-1].isalpha():
-                            return
-                    except:
-                        pass
-                    try:
-                        if gurt_code[i+len(weird)+1].isalpha():
-                            return
-                    except:
-                        break
-                    if weird_allowed:
-                        final_code+=weird_replacements[weird]
-                        i+=len(weird)
-                        break
-
-        
-            
+        for special in special_replace:
+            if i-1 >= 0:
+                if gurt_code[i-1].isalpha():
+                    break
+            if i+1 <= len(gurt_code)-1:
+                if gurt_code[i+1].isalpha():
+                    break
+            if gurt_code[i:i+len(special)] == special and is_actual_code():
+                final_code+=special_replace[special]
+                i+=len(special)
+                break
 
         try:
             final_code += gurt_code[i]
@@ -131,16 +120,17 @@ def make_gurt_style(gurt_code): # YO_GURT
 def gurtvert(infilename, outfilename):
     gurt_style_string = "true=True;false=False;yo=True;gurt=False;yap = print"
     
-    with open(infilename, "r") as gurt:
-        gurt_in = gurt.read()
+    with open(infilename, "r") as f:
+        gurt_in = f.read()
         
-    with open(outfilename, "w") as yo:
+    with open(outfilename, "w") as f:
         gurt_out = gurt_style_string + "\n" + make_gurt_style(gurt_in)
-        yo.write(gurt_out)
+        f.write(gurt_out)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("filename", help="The file you would like to import")
 parser.add_argument("-dist", "--dist-folder", help="The folder where you want your outfile to be stored")
+parser.add_argument("-a", "--args", help="Arguments to pass into the program", nargs="*")
 args = parser.parse_args()
 
 filename = args.filename
@@ -159,8 +149,12 @@ if os.path.splitext(filename)[1] == ".gurt":
     new_file = os.path.splitext(os.path.join(dist_folder, filename))[0] + ".py"
     
     gurtvert(filename, new_file)
+    
+    if isinstance(args.args, list):
+        subprocess.call(["python", new_file] + args.args)
+    else:
+        subprocess.call(["python", new_file])
 
-    with open(new_file) as f:
-        exec(f.read())
+    
 else:
     print("that file doesn't look like a gurt-thon file")
