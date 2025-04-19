@@ -2,6 +2,8 @@ true=True;false=False;yo=True;gurt=False;yap = print
 # new releases will be written in gurt-thon and compiled in the older version
 # IF THIS COMMENT IS IN A .PY FILE, IT HAS BEEN COMPILED FROM GURT SOURCE CODE!!!
 
+# GURT-THON WILL TREAT LINES WITHIN 3 QUOTES AS REAL CODE, USE \n IF YOURE WORRIED
+
 import os
 import argparse
 import subprocess
@@ -19,7 +21,6 @@ replacements = { # conditions but smarter
     "pmo ": "import ",
     "type": "class",
     "gurtfunc ": "def ",
-    "sybau": "exit()",
     "sybau": "exit()",
     # "types"
     "gurtint ": "",
@@ -78,6 +79,7 @@ def make_gurt_style(gurt_code): # YO_GURT
         if single_quote_count % 2== 0:
             if is_actual_code() and single_quote_count!= 0:
                 yap("I DONT LIKE SINGLE QUOTES, ONLY USE DOUBLE (from gurt-thon's developers!)") # (I HATE GURT)
+                dispose()
                 exit()
             single_quote_count = 0
             
@@ -117,6 +119,75 @@ def make_gurt_style(gurt_code): # YO_GURT
             pass
         i += 1 # gurt iterate
 
+    constant_vars = []
+
+    for line in final_code.splitlines():
+        stripped_line = line.strip()
+        splitted_line = stripped_line.split()
+
+        if len(splitted_line)> 2:
+            if splitted_line[0]== "const":
+                constant_vars.append(splitted_line[1])
+            if (splitted_line[1]== "=" and splitted_line[0] in constant_vars) or splitted_line[0][-1]== "=":
+                yap("you cant change a constant value")
+                dispose()
+                exit()
+
+    double_quote_count = 0
+    single_quote_count = 0
+    is_comment = gurt
+    in_f_string = gurt
+    gurt_code = final_code
+    final_code = ""
+    i = 0
+
+    while i< len(gurt_code):
+
+        if gurt_code[i]== "#" and double_quote_count== 0:
+            is_comment = yo
+            
+        elif gurt_code[i]== "\n":
+            is_comment = gurt
+        
+        if gurt_code[i]== "\"" and gurt_code[i-1]!= "\\": #" needed to fix quote errors (i suck at code)
+            double_quote_count += 1
+            if gurt_code[i-1] ==  "f" and double_quote_count ==  1:
+                in_f_string = yo
+            else:
+                in_f_string = gurt
+            
+        if gurt_code[i]== "'":
+            single_quote_count += 1
+        
+        if gurt_code[i]== "{" and in_f_string:
+            double_quote_count = 0
+
+        if gurt_code[i]== "}" and in_f_string:
+            double_quote_count = 1
+
+        if single_quote_count % 2== 0:
+            if is_actual_code() and single_quote_count!= 0:
+                yap("I DONT LIKE SINGLE QUOTES, ONLY USE DOUBLE (from gurt-thon's developers!)") # (I HATE GURT)
+
+                dispose()
+                exit()
+            single_quote_count = 0
+            
+        if double_quote_count % 2== 0:
+            double_quote_count = 0
+            single_quote_count = 0
+
+        if gurt_code[i:i+len("const ")]== "const " and is_actual_code():
+            i+=len("const ")
+
+        try:
+            final_code += gurt_code[i]
+        except:
+            pass
+
+        i += 1
+
+
     return final_code
     
 def gurtvert(infilename, outfilename):
@@ -149,8 +220,15 @@ try:
 except OSError:
     pass
 
+new_file = os.path.splitext(os.path.join(dist_folder, filename))[0] + ".py"
+
+def dispose():
+    try:
+        os.remove(new_file)
+    except:
+        pass
+
 if os.path.splitext(filename)[1]== ".gurt":
-    new_file = os.path.splitext(os.path.join(dist_folder, filename))[0] + ".py"
     
     gurtvert(filename, new_file)
     
@@ -160,7 +238,7 @@ if os.path.splitext(filename)[1]== ".gurt":
         subprocess.call(["python", new_file])
 
     if to_dispose== yo:
-        os.remove(new_file)
+        dispose()
 
     
 else:

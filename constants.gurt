@@ -1,0 +1,9 @@
+
+const gurtint x = 5
+# x = 4 # try decommenting the line (in the gurt file), itll make an error
+
+print(f"x is {x}")
+
+const x = 4
+
+print(f"x is {x}") # const basically makes gurt-thon ignore your error
