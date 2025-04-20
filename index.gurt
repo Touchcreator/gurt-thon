@@ -32,7 +32,7 @@ gurtdict replacements = { # conditions but smarter
 }
 
 gurtdict special_replace = {
-    "me": "self",
+    
 }
 
 

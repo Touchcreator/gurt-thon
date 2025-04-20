@@ -1,4 +1,4 @@
-true=True;false=False;yo=True;gurt=False;yap = print
+true=True;false=False;yo=True;gurt=False;yap=print;gettypeof=type;
 # new releases will be written in gurt-thon and compiled in the older version
 # IF THIS COMMENT IS IN A .PY FILE, IT HAS BEEN COMPILED FROM GURT SOURCE CODE!!!
 
@@ -33,7 +33,7 @@ replacements = { # conditions but smarter
 }
 
 special_replace = {
-    "me": "self",
+    
 }
 
 
