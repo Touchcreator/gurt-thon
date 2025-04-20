@@ -205,8 +205,16 @@ def make_gurt_style(gurt_code): # YO_GURT
 
         i += 1
 
+    # now i need to remove those starts and ends
+    split_final = final_code.splitlines()
+    realrealfinal = ""
+    i = 1
+    while i< len(split_final) - 1:
+        realrealfinal += split_final[i] + "\n"
 
-    return final_code
+        i += 1
+
+    return realrealfinal
     
 def gurtvert(infilename, outfilename):
     gurt_style_string = "true=True;false=False;yo=True;gurt=False;yap=print;gettypeof=type;"
@@ -217,6 +225,14 @@ def gurtvert(infilename, outfilename):
     with open(outfilename, "w") as f:
         gurt_out = gurt_style_string + "\n" + make_gurt_style(gurt_in)
         f.write(gurt_out)
+
+def check_doctype(infile):
+    with open(infile, "r") as f:
+        lines = f.read().splitlines()
+        if lines[0].strip()== "<!DOCTYPE gurt>" and lines[-1].strip()== "<!END gurt>":
+            return yo
+        else:
+            return gurt
 
 parser = argparse.ArgumentParser()
 parser.add_argument("filename", help="The file you would like to import")
@@ -248,16 +264,20 @@ def dispose():
 
 if os.path.splitext(filename)[1]== ".gurt":
     
-    gurtvert(filename, new_file)
-    
-    if isinstance(args.args, list):
-        subprocess.call(["python", new_file] + args.args)
-    else:
-        subprocess.call(["python", new_file])
+    if check_doctype(filename)== yo:
+        gurtvert(filename, new_file)
+        
+        if isinstance(args.args, list):
+            subprocess.call(["python", new_file] + args.args)
+        else:
+            subprocess.call(["python", new_file])
 
-    if to_dispose== yo:
-        dispose()
+        if to_dispose== yo:
+            dispose()
+    else:
+        yap("you need to have doctype and end!")
 
     
 else:
-    print("that file doesn't look like a gurt-thon file") 
+    print("that file doesn't look like a gurt-thon file")
+

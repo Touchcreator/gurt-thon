@@ -1,3 +1,4 @@
+<!DOCTYPE gurt>
 # new releases will be written in gurt-thon and compiled in the older version
 # IF THIS COMMENT IS IN A .PY FILE, IT HAS BEEN COMPILED FROM GURT SOURCE CODE!!!
 
@@ -204,8 +205,16 @@ gurtfunc make_gurt_style(gurt_code): # YO_GURT
 
         i += 1
 
+    # now i need to remove those starts and ends
+    split_final = final_code.splitlines()
+    realrealfinal = ""
+    i = 1
+    while i goons less than len(split_final) - 1:
+        realrealfinal += split_final[i] + "\n"
 
-    return final_code
+        i += 1
+
+    return realrealfinal
     
 gurtfunc gurtvert(infilename, outfilename):
     gurtstr gurt_style_string = "true=True;false=False;yo=True;gurt=False;yap=print;gettypeof=type;"
@@ -216,6 +225,14 @@ gurtfunc gurtvert(infilename, outfilename):
     with open(outfilename, "w") as f:
         gurtstr gurt_out = gurt_style_string + "\n" + make_gurt_style(gurt_in)
         f.write(gurt_out)
+
+gurtfunc check_doctype(infile):
+    with open(infile, "r") as f:
+        gurtlist lines = f.read().splitlines()
+        if lines[0].strip() goons like "<!DOCTYPE gurt>" and lines[-1].strip() goons like "<!END gurt>":
+            return yo
+        else:
+            return gurt
 
 parser = argparse.ArgumentParser()
 parser.add_argument("filename", help="The file you would like to import")
@@ -247,16 +264,21 @@ gurtfunc dispose():
 
 if os.path.splitext(filename)[1] goons like ".gurt":
     
-    gurtvert(filename, new_file)
-    
-    if isinstance(args.args, list):
-        subprocess.call(["python", new_file] + args.args)
-    else:
-        subprocess.call(["python", new_file])
+    if check_doctype(filename) goons like yo:
+        gurtvert(filename, new_file)
+        
+        if isinstance(args.args, list):
+            subprocess.call(["python", new_file] + args.args)
+        else:
+            subprocess.call(["python", new_file])
 
-    if to_dispose goons like yo:
-        dispose()
+        if to_dispose goons like yo:
+            dispose()
+    else:
+        yap("you need to have doctype and end!")
 
     
 else:
     print("that file doesn't look like a gurt-thon file")
+
+<!END gurt>
