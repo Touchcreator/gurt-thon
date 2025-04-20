@@ -4,6 +4,6 @@ const gurtint x = 5
 
 print(f"x is {x}")
 
-const x = 4
+const x = 4 plus or minus 2
 
 print(f"x is {x}") # const basically makes gurt-thon ignore your error

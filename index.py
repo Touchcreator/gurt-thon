@@ -7,6 +7,7 @@ true=True;false=False;yo=True;gurt=False;yap=print;gettypeof=type;
 import os
 import argparse
 import subprocess
+import random
 
 conditions = { # "gurtversion": "pyversion"
     "goons like": "==",
@@ -36,6 +37,9 @@ special_replace = {
     
 }
 
+random_replace = { # basically, its just the operations, but it replaces shit randomly (like during compilation), use tuples!!
+    "plus or minus": ("+", "-")
+}
 
 def make_gurt_style(gurt_code): # YO_GURT
     # no multiline string support for now
@@ -95,11 +99,25 @@ def make_gurt_style(gurt_code): # YO_GURT
                 final_code+=conditions[condition]
                 i+=len(spaced_condition)-1
 
+        for stupid in random_replace:
+            spaced_stupid = " " + stupid + " "
+            
+            if gurt_code[i:i+len(spaced_stupid)]== spaced_stupid and is_actual_code():
+                final_code+=random.choice(random_replace[stupid])
+                i+=len(spaced_stupid)-1
+
         for replacement in replacements:
-            if gurt_code[i:i+len(replacement)]== replacement and is_actual_code():
-                final_code+=replacements[replacement]
-                i+=len(replacement)
-                break
+            if replacement[-1] == " ":
+                if gurt_code[i:i+len(replacement)]== replacement and is_actual_code():
+                    final_code+=replacements[replacement]
+                    i+=len(replacement)
+                    break
+            else:
+                if gurt_code[i:i+len(replacement)]== replacement and is_actual_code():
+                    if gurt_code[i-1].isspace() and gurt_code[i+len(replacement)].isspace():
+                        final_code+=replacements[replacement]
+                        i+=len(replacement)
+                        break
         
         for special in special_replace:
             if i-1>= 0:
