@@ -191,7 +191,7 @@ def make_gurt_style(gurt_code): # YO_GURT
     return final_code
     
 def gurtvert(infilename, outfilename):
-    gurt_style_string = "true=True;false=False;yo=True;gurt=False;yap = print"
+    gurt_style_string = "true=True;false=False;yo=True;gurt=False;yap=print;gettypeof=type;"
     
     with open(infilename, "r") as f:
         gurt_in = f.read()
