@@ -9,6 +9,8 @@ import argparse
 import subprocess
 import random
 
+valid_var_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_"
+
 conditions = { # "gurtversion": "pyversion"
     "goons like": "==",
     "goons different than": "!=",
@@ -23,6 +25,7 @@ replacements = { # conditions but smarter
     "type": "class",
     "gurtfunc ": "def ",
     "sybau": "exit()",
+    "gurtmain:": "if __name__ == '__main__':",
     # "types"
     "gurtint ": "",
     "gurtstr ": "",
@@ -30,6 +33,7 @@ replacements = { # conditions but smarter
     "gurttuple ": "",
     "gurtdict ": "",
     "gurtbool ": "",
+    "gurtobj ": "" # for classes
 
 }
 
@@ -41,7 +45,11 @@ random_replace = { # basically, its just the operations, but it replaces shit ra
     "plus or minus": ("+", "-")
 }
 
-def make_gurt_style(gurt_code): # YO_GURT
+call_replace = ["call", "get"]
+
+def make_gurt_style(gurt_code): # YO_GURT 
+
+
     # no multiline string support for now
     gurt_code = gurt_code + " "
     
@@ -91,6 +99,15 @@ def make_gurt_style(gurt_code): # YO_GURT
             double_quote_count = 0
             single_quote_count = 0
     
+        for caller in call_replace:
+            if gurt_code[i:i+len(caller)]== caller and is_actual_code() and gurt_code[i-1]!= ".":
+                i+=len(caller) + 1
+                while gurt_code[i] in valid_var_chars:
+                    final_code += gurt_code[i]
+                    i+=1
+                final_code += "()"
+                i+=0
+                
         
         for condition in conditions:
             spaced_condition = " " + condition + " "
@@ -239,6 +256,7 @@ parser.add_argument("filename", help="The file you would like to import")
 parser.add_argument("-dist", "--dist-folder", help="The folder where you want your outfile to be stored")
 parser.add_argument("-a", "--args", help="Arguments to pass into the program", nargs="+")
 parser.add_argument("-d", "--dispose", help="Whether or not to dispose of files ran", action="store_true")
+parser.add_argument("-c", "--compile-only", help="This argument sets whether the file should be only compiled and not ran.", action="store_true")
 args = parser.parse_args()
 
 filename = args.filename
@@ -267,10 +285,13 @@ if os.path.splitext(filename)[1]== ".gurt":
     if check_doctype(filename)== yo:
         gurtvert(filename, new_file)
         
-        if isinstance(args.args, list):
-            subprocess.call(["python", new_file] + args.args)
+        if args.compile_only== gurt: # if compile_only is gurt (false) then the program will try to run the file
+            if isinstance(args.args, list):
+                subprocess.call(["python", new_file] + args.args)
+            else:
+                subprocess.call(["python", new_file])
         else:
-            subprocess.call(["python", new_file])
+            yap("successful compilation!")
 
         if to_dispose== yo:
             dispose()
@@ -280,4 +301,6 @@ if os.path.splitext(filename)[1]== ".gurt":
     
 else:
     print("that file doesn't look like a gurt-thon file")
+    
+
 
